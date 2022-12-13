@@ -2,71 +2,59 @@ import { SearchBar } from './Searchbar/Searchbar';
 import { fetchPictureByHits } from './api';
 import { Component } from 'react';
 import { ImageGallery } from './ImageGallery/ImageGallery';
+import { Button } from './Button/Button';
+import { Spinner } from './Loader/Loader';
 
 export class App extends Component {
   state = {
-    image: [],
-    imageName: '',
+    images: [],
+    query: '',
     isLoading: false,
-    currentPage: 1,
     error: null,
+    page: 1,
   };
+
   componentDidUpdate(_, prevState) {
-    if (prevState.imageName !== this.state.imageName) {
-      this.fetchImages();
+    const { query: currentQuery, page: currentPage } = this.state;
+    const { query: prevQuery, page: prevPage } = prevState;
+
+    if (prevQuery !== currentQuery || prevPage !== currentPage) {
+      this.setState({ isLoading: true });
+      fetchPictureByHits(currentQuery, currentPage)
+        .then(images => {
+          console.log(images);
+          this.setState(prevState => ({
+            images: [...prevState.images, ...images],
+          }));
+        })
+        .catch(error =>
+          this.setState({ error: error.message, isLoading: false })
+        )
+        .finally(() => this.setState({ isLoading: false }));
     }
   }
-
-  fetchImages = () => {
-    const { currentPage, imageName } = this.state;
-    const page = currentPage;
-    const query = imageName;
-    const options = { query, page };
-    console.log(query);
-
-    this.setState(prevState => ({
-      currentPage: prevState.currentPage + 1,
-      isLoading: true,
-    }));
-    fetchPictureByHits(options)
-      .then(image => {
-        if (image.length > 0) {
-          console.log('hello');
-          this.setState(prevState => ({
-            image: [...prevState.image, ...image],
-          }));
-        } else {
-          this.setState({ error: true });
-        }
-      })
-      .catch(() => this.setState({ error: true }))
-      .finally(() => this.setState({ isLoading: false }));
-  };
-
-  handleFormSubmit = imageName => {
+  handleFormSubmit = query => {
     this.setState({
-      imageName: imageName,
-      image: [],
-      currentPage: 1,
-      error: null,
+      query,
+      images: [],
+      page: 1,
     });
   };
-  // async componentDidMount() {
-  //   try {
-  //     this.setState({ isLoading: true });
-  //     const image = await fetchPictureByHits();
-  //     this.setState({ image });
-  //   } catch (error) {
-  //   } finally {
-  //     this.setState({ isLoading: false });
-  //   }
-  // }
+
+  handleLoadMore = () => {
+    this.setState(prevState => ({ page: prevState.page + 1 }));
+  };
+
   render() {
     return (
       <div>
         <SearchBar onSubmit={this.handleFormSubmit} />
-        {this.state.image.length > 0 && (
-          <ImageGallery image={this.state.image} />
+        {this.state.isLoading && <Spinner />}
+        {this.state.images.length > 0 && (
+          <>
+            <ImageGallery images={this.state.images} />
+            <Button onClick={this.handleLoadMore} />
+          </>
         )}
 
         {/* {this.state.isLoading && <h1>waiting please</h1>}
