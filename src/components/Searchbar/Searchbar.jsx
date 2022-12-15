@@ -9,6 +9,10 @@ export class SearchBar extends Component {
   state = {
     imageName: '',
   };
+
+  static propTypes = {
+    onSubmit: PropTypes.func.isRequired,
+  };
   handleImageNameChange = event => {
     this.setState({ imageName: event.currentTarget.value.toLowerCase() });
   };
@@ -18,6 +22,7 @@ export class SearchBar extends Component {
       toast(`Enter the name of the picture`);
       return;
     }
+
     this.props.onSubmit(this.state.imageName);
     this.setState({ imageName: '' });
   };
@@ -55,7 +60,3 @@ export class SearchBar extends Component {
     );
   }
 }
-SearchBar.propType = {
-  handleSubmit: PropTypes.func,
-  handleImageNameChange: PropTypes.func,
-};

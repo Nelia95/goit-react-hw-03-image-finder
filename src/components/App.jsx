@@ -1,5 +1,5 @@
 import { SearchBar } from './Searchbar/Searchbar';
-import { fetchPictureByHits } from './api';
+import { fetchPictureByHits } from '../api';
 import { Component } from 'react';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Button } from './Button/Button';
@@ -56,9 +56,6 @@ export class App extends Component {
             <Button onClick={this.handleLoadMore} />
           </>
         )}
-
-        {/* {this.state.isLoading && <h1>waiting please</h1>}
-        {this.state.image && <div>here will be image</div>} */}
       </div>
     );
   }
